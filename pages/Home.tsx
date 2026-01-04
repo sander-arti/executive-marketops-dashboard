@@ -39,13 +39,28 @@ const StatusTicker: React.FC<StatusTickerProps> = ({
   const healthStatus = portfolioHealth >= 80 ? 'Stabil' : portfolioHealth >= 60 ? 'Moderat' : 'Risiko';
   const healthColor = portfolioHealth >= 80 ? 'emerald' : portfolioHealth >= 60 ? 'amber' : 'rose';
 
+  // Static Tailwind classes (dynamic template literals don't work with Tailwind)
+  const iconClasses = cn(
+    'p-2 rounded-full border',
+    healthColor === 'emerald' && 'bg-emerald-50 text-emerald-600 border-emerald-100',
+    healthColor === 'amber' && 'bg-amber-50 text-amber-600 border-amber-100',
+    healthColor === 'rose' && 'bg-rose-50 text-rose-600 border-rose-100'
+  );
+
+  const badgeClasses = cn(
+    'text-sm font-medium px-2 py-0.5 rounded-full',
+    healthColor === 'emerald' && 'text-emerald-600 bg-emerald-50',
+    healthColor === 'amber' && 'text-amber-600 bg-amber-50',
+    healthColor === 'rose' && 'text-rose-600 bg-rose-50'
+  );
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full mb-8">
         {/* 1. AI Synthesized Health Score */}
         <div className="bg-white rounded-xl border border-slate-200 p-6 flex flex-col justify-between shadow-sm hover:shadow-md transition-all duration-300">
             <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3">
-                    <div className={`p-2 bg-${healthColor}-50 text-${healthColor}-600 rounded-full border border-${healthColor}-100`}>
+                    <div className={iconClasses}>
                         <BrainCircuit size={18} />
                     </div>
                     <span className="text-xs font-bold uppercase tracking-wider text-slate-500">Porteføljehelse</span>
@@ -54,7 +69,7 @@ const StatusTicker: React.FC<StatusTickerProps> = ({
 
             <div className="flex items-baseline gap-3 mb-2">
                 <span className="text-4xl font-bold text-slate-900 tracking-tight">{portfolioHealth}</span>
-                <span className={`text-sm font-medium text-${healthColor}-600 bg-${healthColor}-50 px-2 py-0.5 rounded-full`}>
+                <span className={badgeClasses}>
                   {healthStatus}
                 </span>
             </div>
