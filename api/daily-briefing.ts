@@ -10,9 +10,9 @@
  */
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { withAuth, type AuthContext } from '../_lib/middleware';
-import { prisma } from '../_lib/prisma';
-import { mapDailyBriefingToAPI } from '../_lib/mappers';
+import { withAuth, type AuthContext } from './_lib/middleware';
+import { prisma } from './_lib/prisma';
+import { mapDailyBriefingToAPI } from './_lib/mappers';
 
 async function handler(
   req: VercelRequest,

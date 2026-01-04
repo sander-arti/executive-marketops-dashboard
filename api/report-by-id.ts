@@ -1,13 +1,13 @@
 /**
- * GET /api/reports/:id - Get single report by ID
+ * GET /api/report-by-id?id=<reportId> - Get single report by ID
  *
  * Returns: Report (with keyInsights embedded)
  */
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { prisma } from '../_lib/prisma';
-import { withAuth, type AuthContext, corsHeaders } from '../_lib/middleware';
-import { mapReportToAPI } from '../_lib/mappers';
+import { prisma } from './_lib/prisma';
+import { withAuth, type AuthContext, corsHeaders } from './_lib/middleware';
+import { mapReportToAPI } from './_lib/mappers';
 
 async function handler(
   req: VercelRequest,

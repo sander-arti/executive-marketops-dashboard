@@ -1,22 +1,22 @@
 /**
  * Chat API Endpoint - Report-Scoped
  *
- * POST /api/chat/report/:reportId
+ * POST /api/chat-report?reportId=<id>
  *
  * Handles AI chat for specific reports with RAG (Retrieval-Augmented Generation).
  * Fetches report data, constructs context, queries OpenAI, and returns answer with sources.
  */
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { withAuth, errorResponse, corsHeaders } from '../../_lib/middleware';
-import { prisma } from '../../_lib/prisma';
+import { withAuth, errorResponse, corsHeaders } from './_lib/middleware';
+import { prisma } from './_lib/prisma';
 import {
   openai,
   AI_CONFIG,
   REPORT_CHAT_SYSTEM_PROMPT,
   buildReportContext,
   extractSourceReferences,
-} from '../../_lib/openai';
+} from './_lib/openai';
 import { z } from 'zod';
 
 // Request body validation schema
@@ -44,11 +44,11 @@ async function handler(req: VercelRequest, res: VercelResponse, authContext: any
   }
 
   try {
-    // Extract reportId from URL
-    const reportId = req.url?.split('/').pop()?.split('?')[0];
+    // Extract reportId from query parameters
+    const { reportId } = req.query;
 
-    if (!reportId) {
-      errorResponse(res, 400, 'Report ID required');
+    if (!reportId || typeof reportId !== 'string') {
+      errorResponse(res, 400, 'Report ID required as query parameter');
       return;
     }
 

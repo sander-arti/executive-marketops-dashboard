@@ -8,9 +8,9 @@
  */
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { withAuth, type AuthContext } from '../_lib/middleware';
-import { prisma } from '../_lib/prisma';
-import { mapActionItemToAPI } from '../_lib/mappers';
+import { withAuth, type AuthContext } from './_lib/middleware';
+import { prisma } from './_lib/prisma';
+import { mapActionItemToAPI } from './_lib/mappers';
 import { z } from 'zod';
 
 const createActionItemSchema = z.object({

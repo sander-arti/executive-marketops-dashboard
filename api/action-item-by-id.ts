@@ -1,16 +1,16 @@
 /**
  * ActionItem Update API Endpoint
  *
- * PATCH /api/action-items/:id - Update action item
+ * PATCH /api/action-item-by-id?id=<actionItemId> - Update action item
  *
  * Auth required: withAuth middleware
  * Verifies workspace ownership before updating
  */
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { withAuth, type AuthContext } from '../_lib/middleware';
-import { prisma } from '../_lib/prisma';
-import { mapActionItemToAPI } from '../_lib/mappers';
+import { withAuth, type AuthContext } from './_lib/middleware';
+import { prisma } from './_lib/prisma';
+import { mapActionItemToAPI } from './_lib/mappers';
 import { z } from 'zod';
 
 const updateActionItemSchema = z.object({
