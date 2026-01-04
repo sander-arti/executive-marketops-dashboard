@@ -43,15 +43,19 @@ export const Badge = ({ className, variant = "default", ...props }: React.HTMLAt
 };
 
 // --- Button ---
-export const Button = React.forwardRef<HTMLButtonElement, React.ButtonHTMLAttributes<HTMLButtonElement> & { variant?: "default" | "outline" | "ghost" | "secondary" }>(({ className, variant = "default", ...props }, ref) => {
+export const Button = React.forwardRef<HTMLButtonElement, React.ButtonHTMLAttributes<HTMLButtonElement> & { variant?: "default" | "outline" | "ghost" | "secondary"; size?: "default" | "sm" }>(({ className, variant = "default", size = "default", ...props }, ref) => {
   const variants = {
     default: "bg-slate-900 text-slate-50 hover:bg-slate-900/90",
     outline: "border border-slate-200 bg-white hover:bg-slate-100 hover:text-slate-900",
     ghost: "hover:bg-slate-100 hover:text-slate-900",
     secondary: "bg-slate-100 text-slate-900 hover:bg-slate-100/80",
   };
+  const sizes = {
+    default: "h-10 px-4 py-2",
+    sm: "h-9 px-3 py-1.5 text-xs",
+  };
   return (
-    <button ref={ref} className={cn("inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 h-10 px-4 py-2", variants[variant], className)} {...props} />
+    <button ref={ref} className={cn("inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50", variants[variant], sizes[size], className)} {...props} />
   );
 });
 Button.displayName = "Button";

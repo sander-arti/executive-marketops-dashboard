@@ -10,7 +10,7 @@ Ved avveininger: Sikkerhet ≥ Korrekthet > Vedlikeholdbarhet > Ytelse.
 
 # Prosjektkontekst og kjerneinstrukser
 
-ARTIEdu MarketOps (Pharma Nordic) – Premium **Executive Report OS** for pharma: en plattform som gir ledelsen (inkl. markedsføring/BD/GM) et operativt styringssystem basert på **daglig briefing + månedlige rapporter + strategiske hendelser + anbefalte handlinger**, med AI-assistent både **globalt (Bedriftsorakel)** og **kontekstuelt per rapport**.
+ARTI MarketOps (Pharma Nordic) – Premium **Executive Report OS** for pharma: en plattform som gir ledelsen (inkl. markedsføring/BD/GM) et operativt styringssystem basert på **daglig briefing + månedlige rapporter + strategiske hendelser + anbefalte handlinger**, med AI-assistent både **globalt (Bedriftsorakel)** og **kontekstuelt per rapport**.
 
 **Teknologimål (default – juster om prosjektet allerede har valgt noe annet):**
 - Frontend: Next.js (App Router) + TypeScript + Tailwind + shadcn/ui

@@ -21,9 +21,9 @@ async function fetchAPI<T>(
   // Get auth token from localStorage (will be set by AuthContext in Phase 5)
   const token = localStorage.getItem('supabase_auth_token');
 
-  const headers: HeadersInit = {
+  const headers: Record<string, string> = {
     'Content-Type': 'application/json',
-    ...options.headers,
+    ...(options.headers as Record<string, string>),
   };
 
   // Add Authorization header if token exists
