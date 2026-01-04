@@ -8,8 +8,8 @@
  */
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { createSupabaseClient } from './supabase.js';
-import { prisma } from './prisma.js';
+import { createSupabaseClient } from './supabase';
+import { prisma } from './prisma';
 
 /**
  * CORS headers for API responses

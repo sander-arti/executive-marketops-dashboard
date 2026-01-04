@@ -11,10 +11,10 @@
  */
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { prisma } from '../_lib/prisma.js';
-import { withAuth, type AuthContext, corsHeaders } from '../_lib/middleware.js';
-import { validateSchema, GetReportsQuerySchema } from '../_lib/types.js';
-import { mapReportToAPI } from '../_lib/mappers.js';
+import { prisma } from '../_lib/prisma';
+import { withAuth, type AuthContext, corsHeaders } from '../_lib/middleware';
+import { validateSchema, GetReportsQuerySchema } from '../_lib/types';
+import { mapReportToAPI } from '../_lib/mappers';
 
 async function handler(
   req: VercelRequest,
