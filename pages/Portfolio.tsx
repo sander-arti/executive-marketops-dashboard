@@ -1,14 +1,13 @@
 
 import React, { useState, useMemo } from 'react';
 import { InsightItem, Track, PortfolioStatus } from '../types';
-import { REPORTS } from '../mock/data';
 import { ReportView } from '../components/ReportView';
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell, Badge, Button, cn } from '../components/ui';
-import { LayoutGrid, List, ArrowRight, Activity, Microscope, Pill, FlaskConical, Target, MoreHorizontal, X, Check, ChevronRight, Trash2, FileText, Kanban } from 'lucide-react';
+import { LayoutGrid, List, ArrowRight, Activity, Microscope, Pill, FlaskConical, Target, MoreHorizontal, X, Check, ChevronRight, Trash2, FileText, Kanban, Loader2 } from 'lucide-react';
+import { useReports, useInsights } from '../hooks/useReports';
 
 interface PortfolioProps {
   onItemClick: (item: InsightItem) => void;
-  items: InsightItem[]; // These are the "Active" items on the board
   onMove: (id: string, status: PortfolioStatus) => void;
   onReject: (id: string) => void;
 }
@@ -63,20 +62,33 @@ const KanbanCard: React.FC<{ item: InsightItem, columnId: ColumnId, onClick: () 
 
 // --- MAIN PAGE COMPONENT ---
 
-export const Portfolio: React.FC<PortfolioProps> = ({ onItemClick, items, onMove, onReject }) => {
+export const Portfolio: React.FC<PortfolioProps> = ({ onItemClick, onMove, onReject }) => {
   const [activeTab, setActiveTab] = useState<'report' | 'board'>('report');
 
-  // Logic for the Report View
-  const latestReport = REPORTS.find(r => r.track === Track.PORTFOLIO);
+  // Fetch portfolio report from API
+  const { data: portfolioReports, isLoading: reportsLoading, error: reportsError } = useReports({
+    track: Track.PORTFOLIO,
+  });
+  const latestReport = portfolioReports?.[0]; // Most recent
 
-  // Logic for the Board View
+  // Fetch partner candidates from API
+  const { data: candidates, isLoading: candidatesLoading, error: candidatesError } = useInsights({
+    track: Track.PORTFOLIO,
+    type: 'Partnerkandidat',
+  });
+
+  // Filter out rejected, split by status
+  const activeItems = useMemo(() => {
+    return (candidates || []).filter(c => c.status !== 'REJECTED');
+  }, [candidates]);
+
   const boardData = useMemo(() => {
     return {
-        NEW: items.filter(i => i.status === 'NEW'),
-        REVIEW: items.filter(i => i.status === 'REVIEW'),
-        DUE_DILIGENCE: items.filter(i => i.status === 'DUE_DILIGENCE'),
+        NEW: activeItems.filter(i => i.status === 'NEW'),
+        REVIEW: activeItems.filter(i => i.status === 'REVIEW'),
+        DUE_DILIGENCE: activeItems.filter(i => i.status === 'DUE_DILIGENCE'),
     };
-  }, [items]);
+  }, [activeItems]);
 
   const handlePromoteFromReport = (item: InsightItem) => {
       onMove(item.id, 'NEW');
@@ -108,47 +120,84 @@ export const Portfolio: React.FC<PortfolioProps> = ({ onItemClick, items, onMove
             >
                 <Kanban size={16} />
                 Deal Flow & Radar
-                <Badge variant="secondary" className="ml-2 bg-slate-100 border border-slate-200">{items.length}</Badge>
+                <Badge variant="secondary" className="ml-2 bg-slate-100 border border-slate-200">{activeItems.length}</Badge>
             </button>
           </div>
       </div>
 
       {/* Content Area */}
       {activeTab === 'report' ? (
-          latestReport ? (
-            <ReportView 
-                report={latestReport} 
+          reportsLoading ? (
+            <div className="flex items-center justify-center h-full">
+              <div className="text-center">
+                <Loader2 className="h-12 w-12 animate-spin text-blue-500 mx-auto mb-4" />
+                <p className="text-gray-600">Laster rapport...</p>
+              </div>
+            </div>
+          ) : reportsError ? (
+            <div className="flex items-center justify-center h-full">
+              <div className="text-center text-red-600">
+                <p className="text-lg font-semibold">Feil ved lasting av rapport</p>
+                <p className="text-sm mt-2">{reportsError.message}</p>
+              </div>
+            </div>
+          ) : !latestReport ? (
+            <div className="flex items-center justify-center h-full">
+              <div className="text-center text-gray-500">
+                <p className="text-lg">Ingen porteføljerapporter tilgjengelig</p>
+                <p className="text-sm mt-2">Sjekk at seed data er lastet</p>
+              </div>
+            </div>
+          ) : (
+            <ReportView
+                report={latestReport}
                 onItemClick={onItemClick}
                 onAddToBoard={handlePromoteFromReport}
-                allReports={REPORTS.filter(r => r.track === Track.PORTFOLIO)}
+                allReports={portfolioReports || []}
             />
-          ) : <div>Ingen rapport.</div>
+          )
       ) : (
           /* KANBAN BOARD VIEW */
-          <div className="flex-1 overflow-x-auto overflow-y-hidden pb-4">
-              <div className="flex h-full gap-6 min-w-[1000px]">
-                  {COLUMNS.map(col => {
-                      const colItems = boardData[col.id];
-                      return (
-                          <div key={col.id} className="flex-1 min-w-[300px] flex flex-col h-full rounded-2xl bg-slate-100/50 border border-slate-200/50">
-                              <div className="p-4 bg-transparent sticky top-0 z-10">
-                                  <div className="flex items-center justify-between mb-2">
-                                      <h3 className="font-bold text-slate-900 text-sm flex items-center gap-2 uppercase tracking-wide">
-                                          <div className={`w-2 h-2 rounded-full ${col.color}`}></div>{col.title}
-                                      </h3>
-                                      <span className="text-xs font-bold text-slate-500 bg-white px-2 py-1 rounded-full shadow-sm">{colItems.length}</span>
-                                  </div>
-                              </div>
-                              <div className="flex-1 overflow-y-auto p-4 pt-0 space-y-3 custom-scrollbar">
-                                  {colItems.map(item => (
-                                      <KanbanCard key={item.id} item={item} columnId={col.id} onClick={() => onItemClick(item)} onMove={onMove} onReject={onReject}/>
-                                  ))}
-                              </div>
-                          </div>
-                      );
-                  })}
+          candidatesLoading ? (
+            <div className="flex items-center justify-center h-full">
+              <div className="text-center">
+                <Loader2 className="h-12 w-12 animate-spin text-blue-500 mx-auto mb-4" />
+                <p className="text-gray-600">Laster kandidater...</p>
               </div>
-          </div>
+            </div>
+          ) : candidatesError ? (
+            <div className="flex items-center justify-center h-full">
+              <div className="text-center text-red-600">
+                <p className="text-lg font-semibold">Feil ved lasting av kandidater</p>
+                <p className="text-sm mt-2">{candidatesError.message}</p>
+              </div>
+            </div>
+          ) : (
+            <div className="flex-1 overflow-x-auto overflow-y-hidden pb-4">
+                <div className="flex h-full gap-6 min-w-[1000px]">
+                    {COLUMNS.map(col => {
+                        const colItems = boardData[col.id];
+                        return (
+                            <div key={col.id} className="flex-1 min-w-[300px] flex flex-col h-full rounded-2xl bg-slate-100/50 border border-slate-200/50">
+                                <div className="p-4 bg-transparent sticky top-0 z-10">
+                                    <div className="flex items-center justify-between mb-2">
+                                        <h3 className="font-bold text-slate-900 text-sm flex items-center gap-2 uppercase tracking-wide">
+                                            <div className={`w-2 h-2 rounded-full ${col.color}`}></div>{col.title}
+                                        </h3>
+                                        <span className="text-xs font-bold text-slate-500 bg-white px-2 py-1 rounded-full shadow-sm">{colItems.length}</span>
+                                    </div>
+                                </div>
+                                <div className="flex-1 overflow-y-auto p-4 pt-0 space-y-3 custom-scrollbar">
+                                    {colItems.map(item => (
+                                        <KanbanCard key={item.id} item={item} columnId={col.id} onClick={() => onItemClick(item)} onMove={onMove} onReject={onReject}/>
+                                    ))}
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
+            </div>
+          )
       )}
     </div>
   );

@@ -341,6 +341,366 @@ async function main() {
   });
   console.log('✅ Landscape Report-Insight links created');
 
+  // ===== PORTFOLIO REPORT (Track: Portefølje) =====
+
+  // Create portfolio-specific sources
+  const portfolioSource1 = await prisma.source.create({
+    data: {
+      title: 'Nordic Pharma News: NordicBio AS - Breakthrough Inhalation Platform',
+      url: 'https://nordic-pharma-news.com/nordicbio-inhalation-2024',
+      publisher: 'Nordic Pharma News',
+      publishedAt: new Date('2024-10-05'),
+      workspaceId: workspace.id,
+    },
+  });
+
+  const portfolioSource2 = await prisma.source.create({
+    data: {
+      title: 'Swedish Health Tech Report: Digital Adherence Solutions Market Analysis',
+      url: 'https://swedish-healthtech.se/digital-adherence-2024',
+      publisher: 'Swedish Health Tech Association',
+      publishedAt: new Date('2024-10-08'),
+      workspaceId: workspace.id,
+    },
+  });
+
+  const portfolioSource3 = await prisma.source.create({
+    data: {
+      title: 'European Biosimilar Association: Nordic Pipeline Review Q3 2024',
+      url: 'https://biosimilar-eu.org/nordic-pipeline-q3-2024',
+      publisher: 'European Biosimilar Association',
+      publishedAt: new Date('2024-10-03'),
+      workspaceId: workspace.id,
+    },
+  });
+
+  const portfolioSource4 = await prisma.source.create({
+    data: {
+      title: 'Clinical Trials.gov: Oslo Pain Research Phase II Results',
+      url: 'https://clinicaltrials.gov/study/NCT05892341',
+      publisher: 'ClinicalTrials.gov',
+      publishedAt: new Date('2024-10-12'),
+      workspaceId: workspace.id,
+    },
+  });
+
+  const portfolioSource5 = await prisma.source.create({
+    data: {
+      title: 'Danish Biotech Report: Companion Diagnostics Landscape 2024',
+      url: 'https://danish-biotech.dk/companion-dx-2024',
+      publisher: 'Danish Biotech Association',
+      publishedAt: new Date('2024-10-07'),
+      workspaceId: workspace.id,
+    },
+  });
+
+  const portfolioSource6 = await prisma.source.create({
+    data: {
+      title: 'EMA Orphan Database & Swedish Life Science: Rare Disease Assets Review',
+      url: 'https://ema.europa.eu/orphan-designations-sweden-2024',
+      publisher: 'European Medicines Agency / Swedish Life Science',
+      publishedAt: new Date('2024-10-10'),
+      workspaceId: workspace.id,
+    },
+  });
+  console.log('✅ Portfolio sources created: 6');
+
+  // Create partner candidate insights
+  const portfolioInsight1 = await prisma.insight.create({
+    data: {
+      title: 'NordicBio AS: Innovativ inhalasjonsplattform for respiratoriske behandlinger',
+      type: 'Partnerkandidat',
+      track: 'Portefølje',
+      relatedProducts: [],
+      markets: ['NO', 'SE'],
+      significanceScore: 87,
+      impactScore: 8,
+      riskScore: 4,
+      credibilityScore: 9,
+      fitScore: 87,
+      status: 'NEW',
+      whyBullets: [
+        'Kompatibel med vår respiratoriske portefølje (Proponent m.fl.)',
+        'Påvist klinisk data i Phase IIb studier',
+        'Sterk IP-posisjon med patenter til 2038',
+        'Norsk selskap med etablert regulatory track record',
+      ],
+      recommendedNextSteps: [
+        'Innledende møte med NordicBio management innen 14 dager',
+        'Due diligence på IP-portefølje og klinisk data',
+        'Vurder kommersiell synergipotensial med eksisterende produkter',
+      ],
+      workspaceId: workspace.id,
+    },
+  });
+
+  await prisma.insightSource.create({
+    data: {
+      insightId: portfolioInsight1.id,
+      sourceId: portfolioSource1.id,
+    },
+  });
+
+  const portfolioInsight2 = await prisma.insight.create({
+    data: {
+      title: 'Swedish MedTech AB: Digital adherence-løsning med skalerbar SaaS-modell',
+      type: 'Partnerkandidat',
+      track: 'Portefølje',
+      relatedProducts: [],
+      markets: ['SE', 'DK', 'NO'],
+      significanceScore: 82,
+      impactScore: 7,
+      riskScore: 3,
+      credibilityScore: 8,
+      fitScore: 82,
+      status: 'NEW',
+      whyBullets: [
+        'Øker compliance for kroniske behandlinger (dokumentert 40% forbedring)',
+        'Skalerbar SaaS-modell med lave marginalkostnader',
+        'Regulatorisk godkjent i EU som medisinsk utstyr klasse IIa',
+        'Eksisterende integrasjoner med apoteksystemer i Sverige',
+      ],
+      recommendedNextSteps: [
+        'Pilot-studie med ett av våre produkter (Proponent kandidat)',
+        'Commercial due diligence: Vurder customer acquisition cost',
+        'Technical due diligence: Skalerbarhet og datasikkerhet',
+      ],
+      workspaceId: workspace.id,
+    },
+  });
+
+  await prisma.insightSource.create({
+    data: {
+      insightId: portfolioInsight2.id,
+      sourceId: portfolioSource2.id,
+    },
+  });
+
+  const portfolioInsight3 = await prisma.insight.create({
+    data: {
+      title: 'BioNordic ApS: Biosimilar-pipeline med 2 assets i Phase III',
+      type: 'Partnerkandidat',
+      track: 'Portefølje',
+      relatedProducts: [],
+      markets: ['DK', 'NO', 'SE'],
+      significanceScore: 75,
+      impactScore: 7,
+      riskScore: 5,
+      credibilityScore: 8,
+      fitScore: 75,
+      status: 'NEW',
+      whyBullets: [
+        'Kompletterer portefølje innen biologics-segment',
+        'Lavere utviklingskostnad enn de novo utvikling',
+        'Markedsadgang via vår eksisterende nordiske infrastruktur',
+        'Phase III data forventet Q2 2025',
+      ],
+      recommendedNextSteps: [
+        'Analyser konkurranselandskap for begge biosimilar-assets',
+        'Financial modeling: NPV ved ulike markedsscenarier',
+        'Regulatory strategy-møte med vår CMC-avdeling',
+      ],
+      workspaceId: workspace.id,
+    },
+  });
+
+  await prisma.insightSource.create({
+    data: {
+      insightId: portfolioInsight3.id,
+      sourceId: portfolioSource3.id,
+    },
+  });
+
+  const portfolioInsight4 = await prisma.insight.create({
+    data: {
+      title: 'Oslo Pain Research AS: Novel non-opioid smertebehandling med sterke Phase II-data',
+      type: 'Partnerkandidat',
+      track: 'Portefølje',
+      relatedProducts: [],
+      markets: ['NO', 'SE'],
+      significanceScore: 91,
+      impactScore: 9,
+      riskScore: 4,
+      credibilityScore: 9,
+      fitScore: 91,
+      status: 'REVIEW',
+      whyBullets: [
+        'Differensiert virkningsmekanisme (ikke-opioid, redusert avhengighetsrisiko)',
+        'Phase II data viser signifikant effekt vs. placebo (p<0.001)',
+        'Stort uoppfylt behov: Kronisk smerte affekterer 20% av befolkningen',
+        'Fast-track designation fra FDA og EMA',
+      ],
+      recommendedNextSteps: [
+        'Forhandle term sheet for partnerskapsavtale innen 30 dager',
+        'Detaljert scientific due diligence av Phase II-data',
+        'Kommersiell strategi-workshop: Pricing, market access, launch sekvens',
+      ],
+      workspaceId: workspace.id,
+    },
+  });
+
+  await prisma.insightSource.create({
+    data: {
+      insightId: portfolioInsight4.id,
+      sourceId: portfolioSource4.id,
+    },
+  });
+
+  const portfolioInsight5 = await prisma.insight.create({
+    data: {
+      title: 'Copenhagen Diagnostics A/S: Companion diagnostic for presisjonsmedisin',
+      type: 'Partnerkandidat',
+      track: 'Portefølje',
+      relatedProducts: [],
+      markets: ['DK', 'SE', 'NO'],
+      significanceScore: 79,
+      impactScore: 7,
+      riskScore: 4,
+      credibilityScore: 8,
+      fitScore: 79,
+      status: 'REVIEW',
+      whyBullets: [
+        'Muliggjør personalisert medisin for eksisterende produkter',
+        'Cross-selling potensial: Diagnostic + therapeutic bundling',
+        'Regulatory pathway lettere med companion diagnostic',
+        'Dansk selskap med CE-marking allerede på plass',
+      ],
+      recommendedNextSteps: [
+        'Vurder kompatibilitet med vår produktportefølje (især onkologi)',
+        'Kommersiell modeling: Bundling vs. separate pricing',
+        'Regulatory alignment meeting med EMA-kontakt',
+      ],
+      workspaceId: workspace.id,
+    },
+  });
+
+  await prisma.insightSource.create({
+    data: {
+      insightId: portfolioInsight5.id,
+      sourceId: portfolioSource5.id,
+    },
+  });
+
+  const portfolioInsight6 = await prisma.insight.create({
+    data: {
+      title: 'Swedish Rare Disease AB: Orphan drug med EU/USA designation',
+      type: 'Partnerkandidat',
+      track: 'Portefølje',
+      relatedProducts: [],
+      markets: ['SE'],
+      significanceScore: 88,
+      impactScore: 8,
+      riskScore: 5,
+      credibilityScore: 9,
+      fitScore: 88,
+      status: 'DUE_DILIGENCE',
+      whyBullets: [
+        'Høy pricing power i orphan drug-segment (premium pricing)',
+        'Regulatoriske fordeler: Priority review, market exclusivity',
+        'Liten konkurranse i målindikasjon (ultra-orphan)',
+        'Sterk IP-posisjon med komposisjon-of-matter patent',
+      ],
+      recommendedNextSteps: [
+        'Fullstendig IP due diligence med eksterne patent-advokater',
+        'Epidemiologisk analyse: Patient population sizing per marked',
+        'Payer strategy: Early engagement med TLV/Helfo/DKMA',
+      ],
+      workspaceId: workspace.id,
+    },
+  });
+
+  await prisma.insightSource.create({
+    data: {
+      insightId: portfolioInsight6.id,
+      sourceId: portfolioSource6.id,
+    },
+  });
+
+  const portfolioInsight7 = await prisma.insight.create({
+    data: {
+      title: 'Nordic Vaccine AS: Profylaktisk respiratorisk vaksine med pandemiberedskap-potensial',
+      type: 'Partnerkandidat',
+      track: 'Portefølje',
+      relatedProducts: [],
+      markets: ['NO', 'SE', 'DK'],
+      significanceScore: 84,
+      impactScore: 8,
+      riskScore: 6,
+      credibilityScore: 8,
+      fitScore: 84,
+      status: 'DUE_DILIGENCE',
+      whyBullets: [
+        'Komplementerer terapeutisk portefølje (prevensjon vs. behandling)',
+        'Offentlig tender-muligheter (nasjonale vaksineprogrammer)',
+        'Pandemiberedskap: Strategisk verdi utover kommersiell NPV',
+        'Norsk selskap med GMP-sertifisert produksjonsanlegg',
+      ],
+      recommendedNextSteps: [
+        'Manufactoring due diligence: Kapasitet, yield, COGS',
+        'Public health strategy: Møte med Folkehelseinstituttet/Folkhälsomyndigheten',
+        'Competitive intelligence: Andre vaksine-aktører i Norden',
+      ],
+      workspaceId: workspace.id,
+    },
+  });
+
+  await prisma.insightSource.createMany({
+    data: [
+      { insightId: portfolioInsight7.id, sourceId: portfolioSource1.id }, // Nordic Pharma News (general coverage)
+      { insightId: portfolioInsight7.id, sourceId: portfolioSource4.id }, // Clinical trials reference
+    ],
+  });
+  console.log('✅ Portfolio insights (partner candidates) created: 7');
+
+  // Create Portfolio Report
+  const portfolioReport = await prisma.report.create({
+    data: {
+      title: 'Porteføljescan: Oktober 2024',
+      date: '2024-10',
+      track: 'Portefølje',
+      relatedEntity: null, // No specific product
+      summary: 'Sterk måned for porteføljemuligheter med 7 nye partnerkandidater identifisert, inkludert høyt prioriterte nordiske assets innen respiratorisk behandling, smertebehandling og orphan drugs.',
+      score: 84,
+      trend: 'up',
+      aiSummary: 'Oktober 2024 markerer en eksepsjonelt sterk måned for vår partnerstrategi. Tre kandidater (Oslo Pain Research, Swedish Rare Disease, NordicBio) scorer 87+ på fit og bør prioriteres. Geografisk fokus er balansert mellom Norge, Sverige og Danmark.',
+      sections: [
+        {
+          title: 'Executive Summary',
+          content: 'Vi har identifisert 7 høykvalitets partnerkandidater i oktober 2024, hvorav 3 er i NEW-status, 2 i REVIEW og 2 i DUE_DILIGENCE. Gjennomsnittlig fit-score er 83, som er vesentlig over vår terskel på 70. Geografisk fordeling er sterkt nordisk-fokusert, med norske, svenske og danske selskaper godt representert. Terapiområdene spenner fra respiratorisk (NordicBio), smerte (Oslo Pain Research), orphan disease (Swedish Rare Disease) til diagnostics (Copenhagen Diagnostics). Vaksinesegmentet (Nordic Vaccine) representerer en strategisk diversifisering.',
+        },
+        {
+          title: 'Høyt prioriterte kandidater',
+          content: '**1. Oslo Pain Research AS (Fit: 91, Status: REVIEW)**\nNovel non-opioid smertebehandling med imponerende Phase II-data. Fast-track designation fra FDA/EMA indikerer regulatorisk støtte. Stor markedsmulighet (kronisk smerte: 20% prevalens) og differensiert mekanisme gir sterk strategisk rationale.\n\n**Anbefaling:** Akselerere forhandlinger, sikte på term sheet innen 30 dager.\n\n**2. Swedish Rare Disease AB (Fit: 88, Status: DUE_DILIGENCE)**\nOrphan drug med EU/USA designation. Premium pricing-potensial og lav konkurranse. IP-posisjon ser solid ut, men krever eksterne patent-advokater for full due diligence.\n\n**Anbefaling:** Fullføre IP-gjennomgang, early payer engagement.\n\n**3. NordicBio AS (Fit: 87, Status: NEW)**\nInhalasjonsplattform med synergier til Proponent. Norsk selskap med etablert regulatory track record. Klinisk data fra Phase IIb er lovende.\n\n**Anbefaling:** Innledende møte innen 14 dager, fokus på kommersiell synergi.',
+        },
+        {
+          title: 'Markedsmuligheter',
+          content: '**Respiratorisk segment:** NordicBio AS og Nordic Vaccine AS gir oss mulighet til å styrke posisjon i respiratorisk behandling og forebygging.\n\n**Smerte/CNS:** Oslo Pain Research representerer entry i et stort segment med høy unmet need.\n\n**Orphan disease:** Swedish Rare Disease gir oss fotfeste i høymargin orphan-segment.\n\n**Digital health:** Swedish MedTech AB muliggjør digital transformasjon av eksisterende portefølje (adherence, patient engagement).\n\n**Biosimilarer:** BioNordic ApS kompletterer portefølje med lavere-risiko biologics-strategi.',
+        },
+        {
+          title: 'Strategiske anbefalinger',
+          content: '1. **Prioriter top 3:** Fokuser ressurser på Oslo Pain Research, Swedish Rare Disease og NordicBio AS.\n2. **Akselerere due diligence:** Dediker team til parallell due diligence på alle DUE_DILIGENCE-kandidater.\n3. **Strategisk team-workshop:** Samle BD, R&D, Commercial og Finance til 2-dagers workshop for å alignere på porteføljestrategi.\n4. **External advisors:** Engager IP-advokater (Swedish Rare Disease), KOLs (Oslo Pain Research) og manufacturing consultants (Nordic Vaccine).\n5. **Timeline:** Sikte på minst 2 signerte avtaler før årets slutt (Q4 2024).',
+        },
+      ],
+      productId: null,
+      workspaceId: workspace.id,
+    },
+  });
+  console.log('✅ Portfolio report created:', portfolioReport.title);
+
+  // Link insights to portfolio report
+  await prisma.reportInsight.createMany({
+    data: [
+      { reportId: portfolioReport.id, insightId: portfolioInsight1.id },
+      { reportId: portfolioReport.id, insightId: portfolioInsight2.id },
+      { reportId: portfolioReport.id, insightId: portfolioInsight3.id },
+      { reportId: portfolioReport.id, insightId: portfolioInsight4.id },
+      { reportId: portfolioReport.id, insightId: portfolioInsight5.id },
+      { reportId: portfolioReport.id, insightId: portfolioInsight6.id },
+      { reportId: portfolioReport.id, insightId: portfolioInsight7.id },
+    ],
+  });
+  console.log('✅ Portfolio Report-Insight links created');
+
   // Create financials
   await prisma.financial.create({
     data: {
@@ -358,9 +718,9 @@ async function main() {
   console.log('\nSummary:');
   console.log('- Workspace: Pharma Nordic Demo');
   console.log('- Products: 1 (Proponent)');
-  console.log('- Reports: 2 (1 Product Status, 1 Market Landscape)');
-  console.log('- Insights: 5 (2 product-specific, 3 landscape)');
-  console.log('- Sources: 5 (2 product, 3 landscape)');
+  console.log('- Reports: 3 (1 Product Status, 1 Market Landscape, 1 Portfolio)');
+  console.log('- Insights: 12 (2 product-specific, 3 landscape, 7 portfolio/candidates)');
+  console.log('- Sources: 11 (2 product, 3 landscape, 6 portfolio)');
   console.log('- Financials: October 2024');
 }
 
