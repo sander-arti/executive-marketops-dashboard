@@ -769,7 +769,7 @@ async function main() {
             title: 'Proponent: Positiv fase III data publisert',
             summary: 'Resultatene viser 23% bedre effekt enn placebo (p<0.001)',
             priority: 'HIGH',
-            sourceReportId: productReport.id,
+            sourceReportId: null,
           },
           {
             title: 'Regulatorisk godkjenning i Sverige forventet Q1 2025',
