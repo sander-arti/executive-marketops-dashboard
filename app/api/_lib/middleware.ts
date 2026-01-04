@@ -118,9 +118,20 @@ export function withAuth(handler: AuthenticatedHandler) {
 
       const token = authHeader.substring(7); // Remove 'Bearer ' prefix
 
-      // Verify JWT with Supabase
-      const supabase = createSupabaseClient();
-      const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+      // Verify JWT with Supabase by creating a client with the user's token
+      const supabaseUrl = process.env.SUPABASE_URL!;
+      const supabaseAnonKey = process.env.SUPABASE_ANON_KEY!;
+
+      const { createClient } = await import('@supabase/supabase-js');
+      const supabaseWithToken = createClient(supabaseUrl, supabaseAnonKey, {
+        global: {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      });
+
+      const { data: { user }, error: authError } = await supabaseWithToken.auth.getUser();
 
       if (authError || !user) {
         return NextResponse.json(
