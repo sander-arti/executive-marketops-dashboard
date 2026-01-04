@@ -5,7 +5,7 @@
  * Handles authentication headers, error responses, and type-safe interfaces.
  */
 
-import type { Report, InsightItem } from '../types';
+import type { Report, InsightItem, ActionItem, DailyBriefing } from '../types';
 
 // Base URL for API requests
 // In development and production, Vercel rewrites handle /api routing
@@ -140,10 +140,92 @@ export const chatAPI = {
 };
 
 /**
+ * Action Items API
+ */
+export const actionItemsAPI = {
+  /**
+   * List action items with optional filters
+   */
+  list: (params?: {
+    completed?: boolean;
+    priority?: 'HIGH' | 'MEDIUM' | 'LOW';
+  }): Promise<ActionItem[]> => {
+    const queryParams = new URLSearchParams();
+    if (params?.completed !== undefined) {
+      queryParams.set('completed', String(params.completed));
+    }
+    if (params?.priority) {
+      queryParams.set('priority', params.priority);
+    }
+
+    const query = queryParams.toString();
+    return fetchAPI<ActionItem[]>(`/action-items${query ? `?${query}` : ''}`);
+  },
+
+  /**
+   * Create new action item
+   */
+  create: (data: {
+    title: string;
+    description?: string;
+    priority?: 'HIGH' | 'MEDIUM' | 'LOW';
+    dueDate?: string;
+  }): Promise<ActionItem> => {
+    return fetchAPI<ActionItem>('/action-items', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  },
+
+  /**
+   * Update existing action item
+   */
+  update: (id: string, data: {
+    completed?: boolean;
+    priority?: 'HIGH' | 'MEDIUM' | 'LOW';
+    title?: string;
+    description?: string;
+    dueDate?: string;
+  }): Promise<ActionItem> => {
+    return fetchAPI<ActionItem>(`/action-items/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    });
+  },
+};
+
+/**
+ * Daily Briefing API
+ */
+export const dailyBriefingAPI = {
+  /**
+   * Get daily briefing by date (defaults to today)
+   */
+  get: (date?: string): Promise<DailyBriefing | null> => {
+    const queryParams = new URLSearchParams();
+    if (date) {
+      queryParams.set('date', date);
+    }
+
+    const query = queryParams.toString();
+    return fetchAPI<DailyBriefing>(`/daily-briefing${query ? `?${query}` : ''}`)
+      .catch((error) => {
+        // Return null if no briefing exists for this date (404)
+        if (error.message.includes('404') || error.message.includes('No briefing')) {
+          return null;
+        }
+        throw error;
+      });
+  },
+};
+
+/**
  * Combined API object (for easier imports)
  */
 export const api = {
   reports: reportsAPI,
   insights: insightsAPI,
   chat: chatAPI,
+  actionItems: actionItemsAPI,
+  dailyBriefing: dailyBriefingAPI,
 };

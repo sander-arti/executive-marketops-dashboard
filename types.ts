@@ -88,3 +88,35 @@ export interface Report {
 
 // UI State Types
 export type ViewState = 'home' | 'product' | 'landscape' | 'portfolio' | 'oracle' | 'settings';
+
+// Action Item Types
+export interface ActionItem {
+  id: string;
+  title: string;
+  description?: string;
+  priority: 'HIGH' | 'MEDIUM' | 'LOW';
+  completed: boolean;
+  dueDate?: string; // ISO date
+  source?: string; // e.g., "Fra: Proponent Rapport"
+  createdAt: string;
+}
+
+// Daily Briefing Types
+export interface BriefingSection {
+  title: string;
+  summary: string;
+  priority: 'HIGH' | 'MEDIUM' | 'LOW';
+  sourceReportId?: string;
+}
+
+export interface DailyBriefing {
+  id: string;
+  date: string; // YYYY-MM-DD
+  content: {
+    productUpdates: BriefingSection[];
+    marketSignals: BriefingSection[];
+    portfolioUpdates: BriefingSection[];
+  };
+  totalUpdates: number;
+  requiresAttentionCount: number;
+}

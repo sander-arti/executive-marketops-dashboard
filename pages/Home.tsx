@@ -1,42 +1,66 @@
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { InsightItem } from '../types';
 import { INSIGHTS, PRODUCTS } from '../mock/data';
 import { Button, Badge, cn } from '../components/ui';
 import { DailyBriefingModal } from '../components/DailyBriefingModal';
-import { 
-  AlertTriangle, 
-  ArrowRight, 
-  Zap, 
+import { useReports } from '../hooks/useReports';
+import { useActionItems, useUpdateActionItem } from '../hooks/useActionItems';
+import { useDailyBriefing } from '../hooks/useDailyBriefing';
+import {
+  AlertTriangle,
+  ArrowRight,
+  Zap,
   CheckCircle2,
   Sparkles,
   Target,
   X,
   Check,
   BrainCircuit,
-  PieChart
+  PieChart,
+  Loader2
 } from 'lucide-react';
 
 // --- Components ---
 
-const StatusTicker = () => (
+interface StatusTickerProps {
+  portfolioHealth: number;
+  criticalRisks: number;
+  newOpportunities: number;
+  reportCount: number;
+}
+
+const StatusTicker: React.FC<StatusTickerProps> = ({
+  portfolioHealth,
+  criticalRisks,
+  newOpportunities,
+  reportCount
+}) => {
+  const healthStatus = portfolioHealth >= 80 ? 'Stabil' : portfolioHealth >= 60 ? 'Moderat' : 'Risiko';
+  const healthColor = portfolioHealth >= 80 ? 'emerald' : portfolioHealth >= 60 ? 'amber' : 'rose';
+
+  return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full mb-8">
         {/* 1. AI Synthesized Health Score */}
         <div className="bg-white rounded-xl border border-slate-200 p-6 flex flex-col justify-between shadow-sm hover:shadow-md transition-all duration-300">
             <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3">
-                    <div className="p-2 bg-emerald-50 text-emerald-600 rounded-full border border-emerald-100">
+                    <div className={`p-2 bg-${healthColor}-50 text-${healthColor}-600 rounded-full border border-${healthColor}-100`}>
                         <BrainCircuit size={18} />
                     </div>
                     <span className="text-xs font-bold uppercase tracking-wider text-slate-500">Porteføljehelse</span>
                 </div>
             </div>
-            
+
             <div className="flex items-baseline gap-3 mb-2">
-                <span className="text-4xl font-bold text-slate-900 tracking-tight">92</span>
-                <span className="text-sm font-medium text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">Stabil</span>
+                <span className="text-4xl font-bold text-slate-900 tracking-tight">{portfolioHealth}</span>
+                <span className={`text-sm font-medium text-${healthColor}-600 bg-${healthColor}-50 px-2 py-0.5 rounded-full`}>
+                  {healthStatus}
+                </span>
             </div>
-            <p className="text-xs text-slate-400 font-medium">Basert på sentiment i 12 aktive rapporter.</p>
+            <p className="text-xs text-slate-400 font-medium">
+              Basert på sentiment i {reportCount} aktive rapporter.
+            </p>
         </div>
 
         {/* 2. Active Risks */}
@@ -51,14 +75,18 @@ const StatusTicker = () => (
             </div>
 
             <div className="flex items-baseline gap-3 mb-2">
-                <span className="text-4xl font-bold text-slate-900 tracking-tight">3</span>
-                <div className="flex gap-1.5 translate-y-[-2px]">
-                    <div className="h-2.5 w-2.5 rounded-full bg-rose-500 animate-pulse shadow-sm"></div>
-                    <div className="h-2.5 w-2.5 rounded-full bg-rose-500 opacity-50"></div>
-                    <div className="h-2.5 w-2.5 rounded-full bg-amber-400 opacity-50"></div>
-                </div>
+                <span className="text-4xl font-bold text-slate-900 tracking-tight">{criticalRisks}</span>
+                {criticalRisks > 0 && (
+                  <div className="flex gap-1.5 translate-y-[-2px]">
+                      <div className="h-2.5 w-2.5 rounded-full bg-rose-500 animate-pulse shadow-sm"></div>
+                      {criticalRisks > 1 && <div className="h-2.5 w-2.5 rounded-full bg-rose-500 opacity-50"></div>}
+                      {criticalRisks > 2 && <div className="h-2.5 w-2.5 rounded-full bg-amber-400 opacity-50"></div>}
+                  </div>
+                )}
             </div>
-            <p className="text-xs text-slate-400 font-medium">Krever tiltak innen 30 dager.</p>
+            <p className="text-xs text-slate-400 font-medium">
+              {criticalRisks > 0 ? 'Krever tiltak innen 30 dager.' : 'Ingen kritiske risikoer identifisert.'}
+            </p>
         </div>
 
         {/* 3. Opportunities */}
@@ -73,15 +101,13 @@ const StatusTicker = () => (
             </div>
 
             <div className="flex items-baseline gap-3 mb-2">
-                <span className="text-4xl font-bold text-slate-900 tracking-tight">5</span>
-                <span className="text-xs font-bold text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-full border border-indigo-100">
-                    2 Høy prioritet
-                </span>
+                <span className="text-4xl font-bold text-slate-900 tracking-tight">{newOpportunities}</span>
             </div>
             <p className="text-xs text-slate-400 font-medium">Identifisert i markedsscanning.</p>
         </div>
     </div>
-);
+  );
+};
 
 interface FocusAreaCardProps { 
     title: string;
@@ -190,54 +216,108 @@ interface HomeProps {
 export const Home: React.FC<HomeProps> = ({ onItemClick, onNavigate }) => {
   const [isBriefOpen, setIsBriefOpen] = useState(false);
 
-  // Mock Actions State
-  const [actions, setActions] = useState([
-      { id: 'a1', text: 'Godkjenn Q4 kampanjebudsjett for Proponent (DK)', source: 'Fra: Proponent Rapport', priority: 'high' as const },
-      { id: 'a2', text: 'Signer NDA med BioTech Alpha før due diligence', source: 'Fra: M&A Radar', priority: 'high' as const },
-      { id: 'a3', text: 'Alloker ressurser til Task Force: Supply Chain Sweden', source: 'Fra: Markedsrapport', priority: 'medium' as const },
-      { id: 'a4', text: 'Se over oppdatert prisstrategi for Smertebehandling', source: 'Fra: Smertebehandling', priority: 'medium' as const },
-  ]);
+  // Fetch all reports from API
+  const { data: allReports, isLoading: reportsLoading } = useReports();
+
+  // Fetch action items from API (incomplete only)
+  const { data: actionItems, isLoading: actionsLoading } = useActionItems({ completed: false });
+
+  // Fetch today's daily briefing
+  const { data: dailyBriefing } = useDailyBriefing();
+
+  // Mutation for updating action items
+  const updateActionItem = useUpdateActionItem();
+
+  // Compute KPIs from reports
+  const kpis = useMemo(() => {
+    if (!allReports || allReports.length === 0) {
+      return {
+        portfolioHealth: 92, // Default fallback
+        criticalRisks: 0,
+        newOpportunities: 0,
+        reportCount: 0,
+      };
+    }
+
+    // Portfolio Health: Average score of all product reports
+    const productReports = allReports.filter(r => r.track === 'Produkter');
+    const healthScore = productReports.length > 0
+      ? Math.round(productReports.reduce((sum, r) => sum + r.score, 0) / productReports.length)
+      : 92;
+
+    // Critical Risks: Count high-risk insights across all reports
+    const risks = allReports.flatMap(r => r.keyInsights || [])
+      .filter(i => i.type === 'Risiko' && (i.scores?.risk ?? 0) >= 8);
+
+    // New Opportunities: Opportunities created in last 30 days
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    const opportunities = allReports.flatMap(r => r.keyInsights || [])
+      .filter(i => i.type === 'Mulighet' && new Date(i.createdAt || 0) > thirtyDaysAgo);
+
+    return {
+      portfolioHealth: healthScore,
+      criticalRisks: risks.length,
+      newOpportunities: opportunities.length,
+      reportCount: allReports.length,
+    };
+  }, [allReports]);
 
   const handleActionComplete = (id: string) => {
-      setActions(prev => prev.filter(a => a.id !== id));
+    updateActionItem.mutate({ id, data: { completed: true } });
   };
 
   const handleActionDismiss = (id: string) => {
-      setActions(prev => prev.filter(a => a.id !== id));
+    // For now, just mark as completed (in future, could add a "dismissed" field)
+    updateActionItem.mutate({ id, data: { completed: true } });
   };
 
-  const strategicAgenda = [
-      {
-          id: 'focus-1',
-          title: 'Proponent',
-          subtitle: 'Marked: Danmark',
-          status: 'opportunity' as const,
-          description: 'Nye refusjonsvilkår åpner for betydelig markedsandel. Kampanje mot fastleger må godkjennes for å utnytte Q4-vinduet.',
-          actionLabel: 'Gå til produktrapport',
-          targetPage: 'product',
-          navParams: { product: 'Proponent' }
-      },
-      {
-          id: 'focus-2',
-          title: 'Markedsrapport',
-          subtitle: 'Risiko: Supply Chain SE',
-          status: 'risk' as const,
-          description: 'Underleverandør i Sverige varsler forsinkelser. Dette truer leveranser for Q1. Alternativ leverandør må kvalifiseres.',
-          actionLabel: 'Se markedsrapport',
-          targetPage: 'landscape',
-          navParams: null
-      },
-      {
-          id: 'focus-3',
-          title: 'M&A Radar',
-          subtitle: 'Kandidat: BioTech Alpha',
-          status: 'opportunity' as const,
-          description: 'BioTech Alpha (Serie B) har teknologi som matcher vår roadmap 94%. Strategisk avdeling anbefaler å starte innledende dialog.',
-          actionLabel: 'Gå til radar',
-          targetPage: 'portfolio',
-          navParams: null
-      }
-  ];
+  // Compute Strategic Agenda from most recent reports per track
+  const strategicAgenda = useMemo(() => {
+    if (!allReports || allReports.length === 0) {
+      return [];
+    }
+
+    const tracks = ['Produkter', 'Landskap', 'Portefølje'] as const;
+
+    return tracks
+      .map(track => {
+        const reportsInTrack = allReports
+          .filter(r => r.track === track)
+          .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+        const latestReport = reportsInTrack[0];
+        if (!latestReport) return null;
+
+        // Extract top priority insight from this report
+        const topInsight = latestReport.keyInsights?.[0];
+
+        // Determine status based on top insight type
+        let status: 'opportunity' | 'risk' | 'neutral' = 'neutral';
+        if (topInsight?.type === 'Mulighet') status = 'opportunity';
+        else if (topInsight?.type === 'Risiko') status = 'risk';
+
+        // Map track to target page
+        const trackToPage: Record<string, string> = {
+          'Produkter': 'product',
+          'Landskap': 'landscape',
+          'Portefølje': 'portfolio',
+        };
+
+        return {
+          id: `focus-${track}`,
+          title: latestReport.relatedEntity || track,
+          subtitle: topInsight?.title.substring(0, 50) || latestReport.summary.substring(0, 50),
+          status,
+          description: latestReport.summary,
+          actionLabel: track === 'Produkter' ? 'Gå til produktrapport' : track === 'Landskap' ? 'Se markedsrapport' : 'Gå til porteføljescan',
+          targetPage: trackToPage[track],
+          navParams: track === 'Produkter' && latestReport.relatedEntity ? { product: latestReport.relatedEntity } : null,
+        };
+      })
+      .filter(Boolean)
+      .slice(0, 3); // Top 3
+  }, [allReports]);
 
   return (
     <div className="w-full max-w-[1600px] space-y-8 animate-in fade-in duration-500 pb-12">
@@ -280,7 +360,18 @@ export const Home: React.FC<HomeProps> = ({ onItemClick, onNavigate }) => {
       </section>
 
       {/* 3. The Pulse (KPIs) - Refined */}
-      <StatusTicker />
+      {reportsLoading ? (
+        <div className="flex items-center justify-center h-32">
+          <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+        </div>
+      ) : (
+        <StatusTicker
+          portfolioHealth={kpis.portfolioHealth}
+          criticalRisks={kpis.criticalRisks}
+          newOpportunities={kpis.newOpportunities}
+          reportCount={kpis.reportCount}
+        />
+      )}
 
       {/* 4. Main Content: Split Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
@@ -324,15 +415,24 @@ export const Home: React.FC<HomeProps> = ({ onItemClick, onNavigate }) => {
                     <CheckCircle2 size={20} className="text-emerald-600" />
                     Anbefalte Handlinger
                 </h3>
-                <Badge variant="secondary" className="bg-slate-100 text-slate-600">{actions.length}</Badge>
+                <Badge variant="secondary" className="bg-slate-100 text-slate-600">
+                  {actionsLoading ? '...' : actionItems?.length || 0}
+                </Badge>
             </div>
 
             <div className="space-y-4">
-                {actions.length > 0 ? (
-                    actions.map(action => (
-                        <ActionItem 
+                {actionsLoading ? (
+                  <div className="flex items-center justify-center h-32">
+                    <Loader2 className="h-6 w-6 animate-spin text-blue-500" />
+                  </div>
+                ) : (actionItems && actionItems.length > 0) ? (
+                    actionItems.map(action => (
+                        <ActionItem
                             key={action.id}
-                            {...action}
+                            id={action.id}
+                            text={action.title}
+                            source={action.description || 'Fra: System'}
+                            priority={action.priority === 'HIGH' ? 'high' : 'medium'}
                             onComplete={handleActionComplete}
                             onDismiss={handleActionDismiss}
                         />

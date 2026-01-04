@@ -6,7 +6,7 @@
  * Maps score columns to frontend scores object structure
  */
 
-import type { Report, Insight, Source } from '@prisma/client';
+import type { Report, Insight, Source, ActionItem as PrismaActionItem, DailyBriefing as PrismaDailyBriefing } from '@prisma/client';
 import type {
   Report as APIReport,
   InsightItem,
@@ -16,6 +16,8 @@ import type {
   InsightType,
   InsightScores,
   PortfolioStatus,
+  ActionItem,
+  DailyBriefing,
 } from '../../types';
 
 // Type for Prisma Report with nested relations
@@ -103,5 +105,33 @@ export function mapReportToAPI(
     keyInsights: report.insights.map(({ insight }) => mapInsightToAPI(insight)),
     aiSummary: report.aiSummary,
     sections: report.sections as unknown as ReportSection[], // JSON → typed array
+  };
+}
+
+/**
+ * Maps Prisma ActionItem to frontend ActionItem type
+ */
+export function mapActionItemToAPI(item: PrismaActionItem): ActionItem {
+  return {
+    id: item.id,
+    title: item.title,
+    description: item.description ?? undefined,
+    priority: item.priority as 'HIGH' | 'MEDIUM' | 'LOW',
+    completed: item.completed,
+    dueDate: item.dueDate?.toISOString(),
+    createdAt: item.createdAt.toISOString(),
+  };
+}
+
+/**
+ * Maps Prisma DailyBriefing to frontend DailyBriefing type
+ */
+export function mapDailyBriefingToAPI(briefing: PrismaDailyBriefing): DailyBriefing {
+  return {
+    id: briefing.id,
+    date: briefing.date.toISOString().split('T')[0], // YYYY-MM-DD
+    content: briefing.content as unknown as DailyBriefing['content'],
+    totalUpdates: briefing.totalUpdates,
+    requiresAttentionCount: briefing.requiresAttentionCount,
   };
 }

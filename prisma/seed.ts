@@ -714,6 +714,107 @@ async function main() {
   });
   console.log('✅ Financials created for October 2024');
 
+  // ===== ACTION ITEMS =====
+
+  await prisma.actionItem.createMany({
+    data: [
+      {
+        title: 'Godkjenn Q4 kampanjebudsjett for Proponent (DK)',
+        description: 'Fra: Proponent Rapport',
+        priority: 'HIGH',
+        completed: false,
+        dueDate: new Date('2024-11-15'),
+        workspaceId: workspace.id,
+      },
+      {
+        title: 'Evaluer Oslo Pain Research AS som partnerkandidat',
+        description: 'Fra: Porteføljescan',
+        priority: 'HIGH',
+        completed: false,
+        dueDate: new Date('2024-11-20'),
+        workspaceId: workspace.id,
+      },
+      {
+        title: 'Forbered styremøte: Q3 markedsrapport',
+        description: 'Fra: Markedsrapport',
+        priority: 'HIGH',
+        completed: false,
+        dueDate: new Date('2024-11-10'),
+        workspaceId: workspace.id,
+      },
+      {
+        title: 'Review pricing strategy for Nordic markets',
+        description: 'Fra: Markedsrapport',
+        priority: 'MEDIUM',
+        completed: false,
+        workspaceId: workspace.id,
+      },
+    ],
+  });
+  console.log('✅ ActionItems created: 4');
+
+  // ===== DAILY BRIEFING =====
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  await prisma.dailyBriefing.create({
+    data: {
+      date: today,
+      totalUpdates: 7,
+      requiresAttentionCount: 2,
+      content: {
+        productUpdates: [
+          {
+            title: 'Proponent: Positiv fase III data publisert',
+            summary: 'Resultatene viser 23% bedre effekt enn placebo (p<0.001)',
+            priority: 'HIGH',
+            sourceReportId: productReport.id,
+          },
+          {
+            title: 'Regulatorisk godkjenning i Sverige forventet Q1 2025',
+            summary: 'Basert på dialog med Läkemedelsverket',
+            priority: 'MEDIUM',
+          },
+        ],
+        marketSignals: [
+          {
+            title: 'Prispress øker i Norge',
+            summary: 'HELFO varsler strengere transparenskrav',
+            priority: 'HIGH',
+            sourceReportId: landscapeReport.id,
+          },
+          {
+            title: 'Biosimilar-konkurranse intensiveres',
+            summary: '3 nye biosimilarer godkjent i oktober',
+            priority: 'MEDIUM',
+          },
+        ],
+        portfolioUpdates: [
+          {
+            title: 'Oslo Pain Research: Phase II klar for review',
+            summary: 'Due diligence kan starte neste uke',
+            priority: 'HIGH',
+            sourceReportId: portfolioReport.id,
+          },
+          {
+            title: 'Swedish Rare Disease AB: Positivt EMA orphan designation',
+            summary: 'Øker strategisk verdi betydelig',
+            priority: 'MEDIUM',
+            sourceReportId: portfolioReport.id,
+          },
+          {
+            title: 'NordicBio AS: Innledende møte booket',
+            summary: 'Teknisk due diligence 14. november',
+            priority: 'MEDIUM',
+          },
+        ],
+      },
+      workspaceId: workspace.id,
+    },
+  });
+  console.log('✅ DailyBriefing created for today');
+
   console.log('\n🎉 Seeding complete!');
   console.log('\nSummary:');
   console.log('- Workspace: Pharma Nordic Demo');
@@ -722,6 +823,8 @@ async function main() {
   console.log('- Insights: 12 (2 product-specific, 3 landscape, 7 portfolio/candidates)');
   console.log('- Sources: 11 (2 product, 3 landscape, 6 portfolio)');
   console.log('- Financials: October 2024');
+  console.log('- ActionItems: 4');
+  console.log('- DailyBriefing: 1 (today)');
 }
 
 main()
