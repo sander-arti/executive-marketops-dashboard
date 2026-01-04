@@ -14,6 +14,9 @@ importers:
       '@supabase/supabase-js':
         specifier: ^2.89.0
         version: 2.89.0
+      '@vercel/node':
+        specifier: ^5.5.16
+        version: 5.5.16(rollup@4.54.0)
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
@@ -45,9 +48,6 @@ importers:
       '@types/node':
         specifier: ^22.14.0
         version: 22.19.3
-      '@vercel/node':
-        specifier: ^5.5.16
-        version: 5.5.16(rollup@4.54.0)
       '@vitejs/plugin-react':
         specifier: ^5.0.0
         version: 5.1.2(vite@6.4.1(@types/node@22.19.3)(jiti@2.6.1)(tsx@4.21.0))

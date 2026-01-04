@@ -369,3 +369,50 @@ DATABASE_URL=postgresql://...
 ```
 
 ---
+
+## 2026-01-04 - AI Chat Testing Blocked by Infrastructure Issues
+
+**What**: Attempted to test AI chat functionality with real OpenAI API locally and in production.
+
+**Why**: Phase 4 (AI Chat) was already implemented on 2026-01-04. Task was to verify it works with real OpenAI integration.
+
+**How**:
+1. **Local testing (Vercel dev)**: 
+   - Fixed ESM import issues (added/removed `.js` extensions)
+   - Created `api/tsconfig.json` for proper TypeScript compilation
+   - Moved `@vercel/node` from devDependencies to dependencies
+   - Database connection failed: Prisma cannot connect to Supabase (tried both PgBouncer port 6543 and direct port 5432)
+   - Root cause: Vercel dev environment variable loading issues
+
+2. **Production testing**:
+   - Pushed fixes: ESM imports, api/tsconfig.json, package.json dependencies
+   - All API endpoints return 500 FUNCTION_INVOCATION_FAILED
+   - Test endpoint (`/api/test.js`) returns 401 Unauthorized
+   - **Root cause identified**: Vercel Authentication Protection is enabled on entire project
+   - Cannot bypass auth protection via MCP tools (get_access_to_vercel_url doesn't work for API routes)
+
+**Risks**: 
+- AI chat functionality cannot be tested without manual intervention
+- Production deployment may have breaking changes that are undetected
+
+**Blockers**:
+1. **Vercel Authentication Protection** must be disabled in Vercel Dashboard:
+   - Go to: https://vercel.com/arti-consults-projects/executive-marketops-dashboard/settings/deployment-protection
+   - Disable "Vercel Authentication" or add API routes to bypass list
+   
+2. **Alternative**: Test locally after fixing database connection:
+   - Ensure correct DATABASE_URL is loaded by Vercel dev
+   - OR use Docker/local PostgreSQL for development
+
+**Files Modified**:
+- `api/**/*.ts` - Fixed ESM imports (added then removed `.js` extensions)
+- `api/tsconfig.json` - Created TypeScript config for API endpoints
+- `package.json` - Moved @vercel/node to dependencies
+- `api/test.js` - Simple test endpoint (returns 200 but blocked by auth)
+
+**Next Steps** (requires user action):
+1. User must disable Vercel Authentication Protection in dashboard
+2. OR provide bypass token for automated testing
+3. OR accept that AI chat will only be tested after auth protection is removed
+
+**PR**: Commits ffc877a, 5e3c91a, 8fdf685, ab74ff6
