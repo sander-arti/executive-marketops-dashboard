@@ -119,8 +119,22 @@ export function withAuth(handler: AuthenticatedHandler) {
       const token = authHeader.substring(7); // Remove 'Bearer ' prefix
 
       // Verify JWT with Supabase by creating a client with the user's token
-      const supabaseUrl = process.env.SUPABASE_URL!;
-      const supabaseAnonKey = process.env.SUPABASE_ANON_KEY!;
+      const supabaseUrl = process.env.SUPABASE_URL;
+      const supabaseAnonKey = process.env.SUPABASE_ANON_KEY;
+
+      if (!supabaseUrl || !supabaseAnonKey) {
+        console.error('[Auth Middleware] Missing Supabase credentials:', {
+          hasUrl: !!supabaseUrl,
+          hasKey: !!supabaseAnonKey,
+        });
+        return NextResponse.json(
+          {
+            error: 'Server configuration error',
+            message: 'Supabase credentials not configured',
+          },
+          { status: 500, headers }
+        );
+      }
 
       const { createClient } = await import('@supabase/supabase-js');
       const supabaseWithToken = createClient(supabaseUrl, supabaseAnonKey, {
@@ -183,11 +197,15 @@ export function withAuth(handler: AuthenticatedHandler) {
       return response;
 
     } catch (error) {
-      console.error('Auth middleware error:', error);
+      console.error('[Auth Middleware] Error:', {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined,
+        error,
+      });
       return NextResponse.json(
         {
           error: 'Internal Server Error',
-          message: 'Authentication failed',
+          message: error instanceof Error ? error.message : 'Authentication failed',
         },
         { status: 500, headers }
       );
