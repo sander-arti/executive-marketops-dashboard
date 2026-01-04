@@ -39,6 +39,30 @@ const AuthenticatedApp: React.FC = () => {
   // Lifted State: Financial Data (Shared between Settings, Oracle, and Dashboards)
   const [financialData, setFinancialData] = useState<FinancialMetric[]>(MOCK_FINANCIALS);
 
+  // Calculate "New" counts per track for the sidebar badges (MOVED BEFORE CONDITIONAL RETURNS)
+  const newCounts = useMemo(() => {
+    const counts: Record<string, number> = {
+      product: 0,
+      landscape: 0,
+      portfolio: 0
+    };
+
+    const now = new Date();
+
+    insights.forEach(item => {
+      const diffTime = Math.abs(now.getTime() - new Date(item.createdAt).getTime());
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+      if (diffDays <= 3) {
+        if (item.track === Track.PRODUCT) counts.product++;
+        if (item.track === Track.LANDSCAPE) counts.landscape++;
+        if (item.track === Track.PORTFOLIO) counts.portfolio++;
+      }
+    });
+
+    return counts;
+  }, [insights]);
+
   // Show loading state while checking session
   if (loading) {
     return (
@@ -106,30 +130,6 @@ const AuthenticatedApp: React.FC = () => {
         setIsDrawerOpen(false);
     }
   };
-
-  // Calculate "New" counts per track for the sidebar badges
-  const newCounts = useMemo(() => {
-    const counts: Record<string, number> = {
-      product: 0,
-      landscape: 0,
-      portfolio: 0
-    };
-
-    const now = new Date();
-
-    insights.forEach(item => {
-      const diffTime = Math.abs(now.getTime() - new Date(item.createdAt).getTime());
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
-      
-      if (diffDays <= 3) {
-        if (item.track === Track.PRODUCT) counts.product++;
-        if (item.track === Track.LANDSCAPE) counts.landscape++;
-        if (item.track === Track.PORTFOLIO) counts.portfolio++;
-      }
-    });
-
-    return counts;
-  }, [insights]);
 
   const renderContent = () => {
     switch (activePage) {
