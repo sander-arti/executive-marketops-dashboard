@@ -1,0 +1,236 @@
+// MarketOps Dashboard - Prisma Schema
+// CRITICAL: Uses Norwegian enum values to match frontend types.ts exactly!
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ========================================
+// ENUMS (Norwegian values - matches frontend!)
+// ========================================
+
+enum Track {
+  Produkter   // = 'Produkter' in frontend
+  Landskap    // = 'Landskap' in frontend
+  Portefølje  // = 'Portefølje' in frontend
+}
+
+enum InsightType {
+  Mulighet        // = 'Mulighet' in frontend
+  Risiko          // = 'Risiko' in frontend
+  Trend           // = 'Trend' in frontend
+  Evidens         // = 'Evidens' in frontend
+  Partnerkandidat // = 'Partnerkandidat' in frontend
+}
+
+// ========================================
+// CORE ENTITIES
+// ========================================
+
+model Workspace {
+  id        String   @id @default(cuid())
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users          User[]
+  products       Product[]
+  reports        Report[]
+  insights       Insight[]
+  sources        Source[]
+  actionItems    ActionItem[]
+  dailyBriefings DailyBriefing[]
+  financials     Financial[]
+}
+
+model User {
+  id          String   @id @default(cuid())
+  email       String   @unique
+  supabaseId  String   @unique // Maps to Supabase Auth UID
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+
+  @@index([workspaceId])
+}
+
+model Product {
+  id          String   @id @default(cuid())
+  name        String   // "Proponent", "Bentrio", "Smertebehandling"
+  description String?
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  reports     Report[]
+  financials  Financial[]
+
+  @@unique([workspaceId, name])
+  @@index([workspaceId])
+}
+
+// ========================================
+// REPORTS
+// ========================================
+
+model Report {
+  id            String   @id @default(cuid())
+  title         String
+  date          String   // YYYY-MM format (matches frontend)
+  track         Track
+  relatedEntity String?  // Product name (for PRODUCT track)
+  summary       String   @db.Text
+  score         Int      // 0-100 health/opportunity score
+  trend         String   // "up" | "down" | "stable"
+  aiSummary     String   @db.Text
+  sections      Json     // ReportSection[] - {title, content}
+  productId     String?
+  workspaceId   String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  product       Product?  @relation(fields: [productId], references: [id], onDelete: SetNull)
+  workspace     Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  insights      ReportInsight[]
+
+  @@unique([workspaceId, track, date, relatedEntity])
+  @@index([workspaceId, track, date])
+}
+
+// ========================================
+// INSIGHTS (Strategic Events)
+// ========================================
+
+model Insight {
+  id                    String       @id @default(cuid())
+  title                 String
+  type                  InsightType
+  track                 Track
+  relatedProducts       String[]     // Array of product names
+  markets               String[]     // ["NO", "DK", "SE"]
+
+  // Scores (stored as separate columns for queryability)
+  significanceScore     Int          // 0-100
+  impactScore           Int          // 0-10 (called "impact" in frontend)
+  riskScore             Int          // 0-10
+  credibilityScore      Int          // 0-10
+
+  // Drawer content
+  whyBullets            String[]
+  recommendedNextSteps  String[]
+
+  // Portfolio-specific fields
+  fitScore              Int?         // 0-100 (for portfolio candidates)
+  status                String?      // PortfolioStatus: "NEW" | "REVIEW" | "DUE_DILIGENCE" | "SIGNED" | "REJECTED"
+
+  createdAt             DateTime     @default(now())
+  workspaceId           String
+
+  workspace             Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  sources               InsightSource[]
+  reports               ReportInsight[]
+
+  @@index([workspaceId, track])
+  @@index([createdAt])
+}
+
+model Source {
+  id          String   @id @default(cuid())
+  title       String
+  url         String
+  publisher   String
+  publishedAt DateTime
+  workspaceId String
+
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  insights    InsightSource[]
+
+  @@index([workspaceId])
+}
+
+// M:M join table for Insight ↔ Source
+model InsightSource {
+  insightId String
+  sourceId  String
+
+  insight   Insight @relation(fields: [insightId], references: [id], onDelete: Cascade)
+  source    Source  @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+
+  @@id([insightId, sourceId])
+  @@index([insightId])
+  @@index([sourceId])
+}
+
+// M:M join table for Report ↔ Insight
+model ReportInsight {
+  reportId  String
+  insightId String
+
+  report    Report  @relation(fields: [reportId], references: [id], onDelete: Cascade)
+  insight   Insight @relation(fields: [insightId], references: [id], onDelete: Cascade)
+
+  @@id([reportId, insightId])
+  @@index([reportId])
+  @@index([insightId])
+}
+
+// ========================================
+// FINANCIALS
+// ========================================
+
+model Financial {
+  id            String   @id @default(cuid())
+  productId     String
+  period        String   // YYYY-MM
+  revenue       Float    // MNOK
+  marketShare   Float    // Percentage
+  targetRevenue Float
+  workspaceId   String
+
+  product       Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+  workspace     Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, productId, period])
+  @@index([workspaceId, productId])
+}
+
+// ========================================
+// ACTION ITEMS
+// ========================================
+
+model ActionItem {
+  id          String    @id @default(cuid())
+  title       String
+  description String?
+  priority    String    @default("medium") // "high" | "medium" | "low"
+  completed   Boolean   @default(false)
+  dueDate     DateTime?
+  workspaceId String
+
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  createdAt   DateTime  @default(now())
+
+  @@index([workspaceId, completed])
+}
+
+// ========================================
+// DAILY BRIEFING
+// ========================================
+
+model DailyBriefing {
+  id                     String   @id @default(cuid())
+  date                   DateTime @db.Date
+  content                Json     // {productUpdates, marketSignals, portfolioUpdates}
+  totalUpdates           Int
+  requiresAttentionCount Int
+  workspaceId            String
+
+  workspace              Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, date])
+  @@index([workspaceId, date])
+}
