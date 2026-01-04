@@ -5,9 +5,9 @@
  */
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { prisma } from '../_lib/prisma';
-import { withAuth, type AuthContext, corsHeaders } from '../_lib/middleware';
-import { mapReportToAPI } from '../_lib/mappers';
+import { prisma } from '../_lib/prisma.js';
+import { withAuth, type AuthContext, corsHeaders } from '../_lib/middleware.js';
+import { mapReportToAPI } from '../_lib/mappers.js';
 
 async function handler(
   req: VercelRequest,

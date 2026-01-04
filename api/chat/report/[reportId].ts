@@ -8,15 +8,15 @@
  */
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { withAuth, errorResponse, corsHeaders } from '../../_lib/middleware';
-import { prisma } from '../../_lib/prisma';
+import { withAuth, errorResponse, corsHeaders } from '../../_lib/middleware.js';
+import { prisma } from '../../_lib/prisma.js';
 import {
   openai,
   AI_CONFIG,
   REPORT_CHAT_SYSTEM_PROMPT,
   buildReportContext,
   extractSourceReferences,
-} from '../../_lib/openai';
+} from '../../_lib/openai.js';
 import { z } from 'zod';
 
 // Request body validation schema
